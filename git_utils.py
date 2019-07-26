@@ -22,19 +22,19 @@ def getValidArg(args, currentIdx):
 
 def pull(branch):
         try:
-                subprocess.run("git checkout {}".format(branch),
+                subprocess.run(f"git checkout {branch}",
                         shell=True, 
                         check=True,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-                subprocess.run("git pull origin {}".format(branch), shell=True)
+                subprocess.run(f"git pull origin {branch}", shell=True)
         except subprocess.CalledProcessError:
-                print("{} branch does not exist in this git repo, ignoring".format(branch))
+                print(f"{branch} branch does not exist in this git repo, ignoring")
 
 def merge(args, argIdx):
         target = getValidArg(args, argIdx)
-        print("Merging {} into {}".format(target, getCurrentBranch())) # TODO - check si existe el branch a mergear
-        subprocess.run("git merge {}".format(target),shell=True)
+        print(f"Merging {target} into {getCurrentBranch()}") # TODO - check si existe el branch a mergear
+        subprocess.run(f"git merge {target}",shell=True)
 
 def diff(args, argIdx):
         target = getValidArg(args, argIdx)
