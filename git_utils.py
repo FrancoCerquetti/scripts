@@ -20,6 +20,16 @@ def getValidArg(args, currentIdx):
         else:
                 return args[currentIdx]
 
+def getBranchesToPull(args, branches=[], currentIdx=0):
+        if len(args) == 0:
+                return ["master", "release", "develop"]
+
+        if re.search(r"^(--|-)", args[currentIdx]):
+                return branches
+        else:
+                branches.append(args[currentIdx])
+                return getBranchesToPull(args, branches, currentIdx + 1)
+
 def pull(branch):
         try:
                 subprocess.run(f"git checkout {branch}",
@@ -41,13 +51,14 @@ def diff(args, argIdx):
         subprocess.run(f"git diff {target} {getCurrentBranch()}", shell=True)
 
 def main():
+        arguments = sys.argv[1:]
         currentBranch = getCurrentBranch()
-        for branch in branches:
+        
+        for branch in getBranchesToPull(arguments):
                 print(f"--- Pulling from {branch}")
                 pull(branch)
         subprocess.run(f"git checkout {currentBranch}", shell=True)
         
-        arguments = sys.argv[1:]
         for idx, arg in enumerate(arguments):
                 try:
                         args[arg](arguments, idx)
