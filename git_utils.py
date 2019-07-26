@@ -8,7 +8,7 @@ def printUsage():
         print("Usage: git_pull.py [OPTIONS] [BRANCH]")
 
 def getCurrentBranch():
-        return subprocess.run(r"git branch | grep \* | cut -d ' ' -f2", 
+        return subprocess.run(r"git branch | grep \* | cut -d ' ' -f2",
                 shell=True, 
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -21,11 +21,13 @@ def getValidArg(args, currentIdx):
                 return args[currentIdx]
 
 def getBranchesToPull(args, branches=[], currentIdx=0):
+        defaultBranches = ["master", "release", "develop"]
+        
         if len(args) == 0:
-                return ["master", "release", "develop"]
+                return defaultBranches
 
         if re.search(r"^(--|-)", args[currentIdx]):
-                return branches
+                return branches if (len(branches) > 0) else defaultBranches
         else:
                 branches.append(args[currentIdx])
                 return getBranchesToPull(args, branches, currentIdx + 1)
@@ -43,7 +45,7 @@ def pull(branch):
 
 def merge(args, argIdx):
         target = getValidArg(args, argIdx)
-        print(f"Merging {target} into {getCurrentBranch()}") # TODO - check si existe el branch a mergear
+        print(f"Merging {target} into {getCurrentBranch()}")
         subprocess.run(f"git merge {target}",shell=True)
 
 def diff(args, argIdx):
