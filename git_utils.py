@@ -38,7 +38,7 @@ def merge(args, argIdx):
 
 def diff(args, argIdx):
         target = getValidArg(args, argIdx)
-        subprocess.run("git diff {} {}".format(target, getCurrentBranch()), shell=True)
+        subprocess.run(f"git diff {target} {getCurrentBranch()}", shell=True)
 
 def main():
         currentBranch = getCurrentBranch()
