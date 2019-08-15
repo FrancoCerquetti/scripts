@@ -55,7 +55,7 @@ def diff(args, argIdx):
 def getCommitPrefix():
         branch = getCurrentBranch()
         prefix = re.search(r'^[A-Z]{3}-[0-9]{3}', branch)
-        return prefix.group() if prefix is not None else ''
+        return (prefix.group() + '_') if prefix is not None else ''
 
 def checkNeedToPullAll(arguments):
         for arg in arguments:
@@ -72,7 +72,7 @@ def pullAll(arguments):
 
 def commit(args, argIdx):
         print("hola")
-        prefix = getCommitPrefix() + '_'
+        prefix = getCommitPrefix()
         subprocess.run("git add .", shell=True)
         subprocess.run(f"git commit -m {prefix + getValidArg(args, argIdx)}", shell=True)
 
