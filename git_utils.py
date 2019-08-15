@@ -52,15 +52,37 @@ def diff(args, argIdx):
         target = getValidArg(args, argIdx)
         subprocess.run(f"git diff {target} {getCurrentBranch()}", shell=True)
 
-def main():
-        arguments = sys.argv[1:]
+def getCommitPrefix():
+        branch = getCurrentBranch()
+        prefix = re.search(r'^[A-Z]{3}-[0-9]{3}', branch)
+        return prefix.group() if prefix is not None else ''
+
+def checkNeedToPullAll(arguments):
+        for arg in arguments:
+                if re.search(r'^-[a-z]*', arg):
+                        return False
+        return True
+
+def pullAll(arguments):
         currentBranch = getCurrentBranch()
-        
         for branch in getBranchesToPull(arguments):
                 print(f"--- Pulling from {branch}")
                 pull(branch)
         subprocess.run(f"git checkout {currentBranch}", shell=True)
+
+def commit(args, argIdx):
+        print("hola")
+        prefix = getCommitPrefix() + '_'
+        subprocess.run("git add .", shell=True)
+        subprocess.run(f"git commit -m {prefix + getValidArg(args, argIdx)}", shell=True)
+
+
+def main():
+        arguments = sys.argv[1:]
         
+        if checkNeedToPullAll(arguments):
+                pullAll(arguments)
+
         for idx, arg in enumerate(arguments):
                 try:
                         args[arg](arguments, idx)
@@ -73,7 +95,8 @@ def main():
 branches = ["master", "release", "develop"]
 args = {
         "--merge": merge,
-        "--diff": diff
+        "--diff": diff,
+        "-c": commit
 }
 
 if __name__ == "__main__":
