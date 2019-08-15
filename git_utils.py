@@ -71,7 +71,6 @@ def pullAll(arguments):
         subprocess.run(f"git checkout {currentBranch}", shell=True)
 
 def commit(args, argIdx):
-        print("hola")
         prefix = getCommitPrefix()
         subprocess.run("git add .", shell=True)
         subprocess.run(f"git commit -m '{prefix + getValidArg(args, argIdx)}'", shell=True)
