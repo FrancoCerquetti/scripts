@@ -4,8 +4,26 @@ import subprocess
 import sys
 import re
 
+defaultBranches = ["master", "release", "develop"]
+
 def printUsage():
-        print("Usage: git_pull.py [OPTIONS] [BRANCH]")
+        print("Usage: git_pull.py [OPTIONS] [BRANCHES]")
+        print(f"Default branches to pull: {defaultBranches}")
+
+def printAvailableArguments(args):
+        print("List of available arguments:")
+        for arg in args:
+                print(f"\t* {arg}")
+
+def sanitizeArguments(arguments):
+        args = []
+        parameters = []
+        for item in arguments:
+                if re.search(r"^-+", item):
+                        args.append(item)
+                else:
+                        parameters.append(item)
+        return (args, parameters)
 
 def getCurrentBranch():
         return subprocess.run(r"git branch | grep \* | cut -d ' ' -f2",
@@ -14,15 +32,7 @@ def getCurrentBranch():
                 stderr=subprocess.PIPE,
                 encoding="UTF-8").stdout
 
-def getValidArg(args, currentIdx):
-        if re.search(r"^(--|-)", args[currentIdx]):
-                return getValidArg(args, currentIdx + 1)
-        else:
-                return args[currentIdx]
-
 def getBranchesToPull(args, branches=[], currentIdx=0):
-        defaultBranches = ["master", "release", "develop"]
-        
         if len(args) == 0:
                 return defaultBranches
 
@@ -43,25 +53,23 @@ def pull(branch):
         except subprocess.CalledProcessError:
                 print(f"{branch} branch does not exist in this git repo, ignoring")
 
-def merge(args, argIdx):
-        target = getValidArg(args, argIdx)
+def merge(params):
+        target = params[0]
+        params.pop(0)
         print(f"Merging {target} into {getCurrentBranch()}")
         subprocess.run(f"git merge {target}",shell=True)
 
-def diff(args, argIdx):
-        target = getValidArg(args, argIdx)
+def diff(params):
+        target = params[0]
         subprocess.run(f"git diff {target} {getCurrentBranch()}", shell=True)
 
 def getCommitPrefix():
         branch = getCurrentBranch()
-        prefix = re.search(r'^[A-Z]{3}-[0-9]{3}', branch)
+        prefix = re.search(r'^[A-Z]{3,4}-[0-9]{3,4}', branch)
         return (prefix.group() + ': ') if prefix is not None else ''
 
 def checkNeedToPullAll(arguments):
-        for arg in arguments:
-                if re.search(r'^-[a-z]*', arg):
-                        return False
-        return True
+        return '-c' not in arguments
 
 def pullAll(arguments):
         currentBranch = getCurrentBranch()
@@ -70,28 +78,24 @@ def pullAll(arguments):
                 pull(branch)
         subprocess.run(f"git checkout {currentBranch}", shell=True)
 
-def commit(args, argIdx):
+def commit(params):
         prefix = getCommitPrefix()
         subprocess.run("git add .", shell=True)
-        subprocess.run(f"git commit -m '{prefix + getValidArg(args, argIdx)}'", shell=True)
-
+        subprocess.run(f"git commit -m '{prefix + params[0]}'", shell=True)
 
 def main():
-        arguments = sys.argv[1:]
+        arguments, parameters = sanitizeArguments(sys.argv[1:])
         
         if checkNeedToPullAll(arguments):
                 pullAll(arguments)
 
-        for idx, arg in enumerate(arguments):
+        for arg in arguments:
                 try:
-                        args[arg](arguments, idx)
+                        args[arg](parameters)
                 except KeyError:
-                        pass
-                except ValueError:
                         printUsage()
+                        printAvailableArguments(args)
 
-# Excluir branches
-branches = ["master", "release", "develop"]
 args = {
         "--merge": merge,
         "--diff": diff,
