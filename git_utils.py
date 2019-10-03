@@ -6,6 +6,8 @@ import re
 
 defaultBranches = ["master", "release", "develop"]
 
+# TODO: ammend, reverts?, interactive delete(con o sin pushear)
+
 def printUsage():
         print("Usage: git_pull.py [OPTIONS] [BRANCHES]")
         print(f"Default branches to pull: {defaultBranches}")
@@ -61,15 +63,25 @@ def merge(params):
 
 def diff(params):
         target = params[0]
+        params.pop(0)
         subprocess.run(f"git diff {target} {getCurrentBranch()}", shell=True)
+
+def renameBranch(params):
+        newName = params[0]
+        params.pop(0)
+        oldName = getCurrentBranch()
+        print(f"New branch name: {oldName} => {newName}")
+        subprocess.run(f"git branch -m {newName}", shell=True)
+        subprocess.run(f"git push origin :{oldName}", shell=True)
 
 def getCommitPrefix():
         branch = getCurrentBranch()
         prefix = re.search(r'^[A-Z]{3,4}-[0-9]{3,4}', branch)
         return (prefix.group() + ': ') if prefix is not None else ''
 
+# TODO - Mejorar este checkeo
 def checkNeedToPullAll(arguments):
-        return '-c' not in arguments
+        return ('-c' not in arguments) and ('-m' not in arguments)
 
 def pullAll(arguments):
         currentBranch = getCurrentBranch()
@@ -99,7 +111,8 @@ def main():
 args = {
         "--merge": merge,
         "--diff": diff,
-        "-c": commit
+        "-c": commit,
+        "-m": renameBranch
 }
 
 if __name__ == "__main__":
