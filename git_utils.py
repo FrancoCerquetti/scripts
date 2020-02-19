@@ -4,9 +4,9 @@ import subprocess
 import sys
 import re
 
-defaultBranches = ["master", "release", "develop"]
+defaultBranches = ["master", "beta", "develop"]
 
-# TODO: ammend, reverts?, interactive delete(con o sin pushear)
+# TODO: ammend, reverts?, interactive delete(con o sin pushear), pull requests(with jira comment), open pull request??
 
 def printUsage():
         print("Usage: git_pull.py [OPTIONS] [BRANCHES]")
@@ -56,19 +56,16 @@ def pull(branch):
                 print(f"{branch} branch does not exist in this git repo, ignoring")
 
 def merge(params):
-        target = params[0]
-        params.pop(0)
+        target = params.pop(0)
         print(f"Merging {target} into {getCurrentBranch()}")
         subprocess.run(f"git merge {target}",shell=True)
 
 def diff(params):
-        target = params[0]
-        params.pop(0)
+        target = params.pop(0)
         subprocess.run(f"git diff {target} {getCurrentBranch()}", shell=True)
 
 def renameBranch(params):
-        newName = params[0]
-        params.pop(0)
+        newName = params.pop(0)
         oldName = getCurrentBranch()
         print(f"New branch name: {oldName} => {newName}")
         subprocess.run(f"git branch -m {newName}", shell=True)
