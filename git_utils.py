@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 
 import subprocess
 import sys
@@ -73,7 +73,7 @@ def renameBranch(params):
 
 def getCommitPrefix():
         branch = getCurrentBranch()
-        prefix = re.search(r'^[A-Z]{3,4}-[0-9]{3,4}', branch)
+        prefix = re.search(r'^[A-Z]{3,4}-[0-9]{3,5}', branch)
         return (prefix.group() + ': ') if prefix is not None else ''
 
 # TODO - Mejorar este checkeo
